@@ -1,4 +1,5 @@
 -- [[ CONFIGURATION ]]
+local lp = game.Players.LocalPlayer
 local slotsToStep = {1, 2, 3, 4, 5, 7, 8, 9}
 local potionsToBuy = {
     "Greed", "Fairy", "Evil", "Bank", "Angelic", 
@@ -6,7 +7,43 @@ local potionsToBuy = {
 }
 
 _G.AutoFarm = false 
-_G.AutoPotions = false -- สถานะเริ่มต้นการซื้อโพชั่น
+_G.AutoPotions = false
+
+-- [[ FUNCTION: AUTO DETECT MY PLOT ]]
+-- ฟังก์ชันสำหรับหาพล็อตที่ใกล้ตัวที่สุด หรือเป็นของเราอัตโนมัติ
+local function getMyPlot()
+    local plotsFolder = game:GetService("Workspace"):FindFirstChild("Plots")
+    if not plotsFolder then return nil end
+
+    -- 1. ลองหาพล็อตที่ชื่อเดียวกับผู้เล่น
+    local namedPlot = plotsFolder:FindFirstChild(lp.Name)
+    if namedPlot then return namedPlot end
+
+    -- 2. ถ้าไม่เจอ ให้หาพล็อตที่ตัวละครยืนอยู่ใกล้ที่สุด
+    local closestPlot = nil
+    local shortestDist = math.huge
+
+    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+        for _, plot in ipairs(plotsFolder:GetChildren()) do
+            -- ตรวจสอบว่าเป็น Model หรือ BasePart ที่มีพิกัด
+            local plotPos = nil
+            if plot:IsA("Model") then
+                plotPos = plot:GetModelCFrame().Position
+            elseif plot:IsA("BasePart") then
+                plotPos = plot.Position
+            end
+
+            if plotPos then
+                local dist = (plotPos - lp.Character.HumanoidRootPart.Position).Magnitude
+                if dist < shortestDist then
+                    shortestDist = dist
+                    closestPlot = plot
+                end
+            end
+        end
+    end
+    return closestPlot
+end
 
 -- [[ GUI CREATION ]]
 local ScreenGui = Instance.new("ScreenGui")
@@ -23,14 +60,14 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 MainFrame.Position = UDim2.new(0.05, 0, 0.4, 0)
-MainFrame.Size = UDim2.new(0, 180, 0, 130) 
+MainFrame.Size = UDim2.new(0, 180, 0, 130)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
 local MainCorner = UICorner:Clone()
 MainCorner.Parent = MainFrame
 
-
+--  Auto Farm
 ToggleFarm.Name = "ToggleFarm"
 ToggleFarm.Parent = MainFrame
 ToggleFarm.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
@@ -43,7 +80,7 @@ ToggleFarm.TextSize = 14
 local Corner1 = UICorner:Clone()
 Corner1.Parent = ToggleFarm
 
--- ปุ่ม Auto Potions
+-- Auto Potions
 TogglePotions.Name = "TogglePotions"
 TogglePotions.Parent = MainFrame
 TogglePotions.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
@@ -73,18 +110,20 @@ end)
 task.spawn(function()
     while true do
         if _G.AutoFarm then
-            local lp = game.Players.LocalPlayer
-            local plots = game:GetService("Workspace"):FindFirstChild("Plots")
-            local myPlot = plots and plots:FindFirstChild("Plot1")
+            local myPlot = getMyPlot() -- <--- ตรวจสอบพล็อตอัตโนมัติทุกรอบ
             
             if myPlot and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                for _, slotNumber in ipairs(slotsToStep) do
-                    if not _G.AutoFarm then break end
-                    local slotFolder = myPlot.Slots:FindFirstChild(tostring(slotNumber))
-                    if slotFolder and slotFolder:FindFirstChild("Button") then
-                        firetouchinterest(lp.Character.HumanoidRootPart, slotFolder.Button, 0)
-                        task.wait(0.05)
-                        firetouchinterest(lp.Character.HumanoidRootPart, slotFolder.Button, 1)
+                local slotsFolder = myPlot:FindFirstChild("Slots")
+                if slotsFolder then
+                    for _, slotNumber in ipairs(slotsToStep) do
+                        if not _G.AutoFarm then break end
+                        local slotFolder = slotsFolder:FindFirstChild(tostring(slotNumber))
+                        if slotFolder and slotFolder:FindFirstChild("Button") then
+                            local button = slotFolder.Button
+                            firetouchinterest(lp.Character.HumanoidRootPart, button, 0)
+                            task.wait(0.05)
+                            firetouchinterest(lp.Character.HumanoidRootPart, button, 1)
+                        end
                     end
                 end
             end
@@ -101,10 +140,10 @@ task.spawn(function()
             for _, potionName in ipairs(potionsToBuy) do
                 if not _G.AutoPotions then break end
                 potionRemote:FireServer(potionName, 10)
-                task.wait(0.1) 
+                task.wait(0.1)
             end
         end
-        task.wait(5) 
+        task.wait(5)
     end
 end)
 
@@ -115,4 +154,4 @@ game:GetService("Players").LocalPlayer.Idled:Connect(function()
     VirtualUser:ClickButton2(Vector2.new())
 end)
 
-print("Full Script Loaded: Auto Step + Auto Potion + Anti-AFK")
+print("Full Script Loaded: Auto Detect Plot + Auto Step + Auto Potion + Anti-AFK")
