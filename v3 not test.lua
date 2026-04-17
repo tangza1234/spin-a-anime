@@ -1,35 +1,55 @@
 -- ================================================
---   🌀 Spin a Anime - [V3.7 ALL CRATES]
---   แก้ไขโดย: tangza1234
+--   🌀 Spin a Anime - [V3.9 PLOT NAME FIX]
+--   แก้ไขปัญหา: ชื่อพล็อตเป็นตัวเลข (1, 2, 3...)
 --   รายการกล่อง: Royal, Samurai, Magma, Manga, Construction
 -- ================================================
 
--- [[ CONFIGURATION ]]
 local lp = game.Players.LocalPlayer
 local slotsToStep = {1, 2, 3, 4, 5, 7, 8, 9, 10}
-
--- รายชื่อกล่องทั้งหมดที่ต้องการซื้อ (วนซื้อทีละกล่อง)
 local cratesToBuy = {"Royal", "Samurai", "Magma", "Manga", "Construction"} 
-
-local potionsToBuy = {
-    "Greed", "Fairy", "Evil", "Bank", "Angelic",
-    "Clover", "Super Lucky", "Super Yen", "Mutation", "Lucky", "Yen"
-}
+local potionsToBuy = {"Greed", "Fairy", "Evil", "Bank", "Angelic", "Clover", "Super Lucky", "Super Yen", "Mutation", "Lucky", "Yen"}
 
 _G.AutoFarm = false
 _G.AutoPotions = false
 _G.AutoCrates = false
 
--- [[ FUNCTION: AUTO DETECT MY PLOT ]]
+-- [[ NEW FUNCTION: FIND PLOT BY PROXIMITY ]]
+-- ใช้การหาพล็อตที่ใกล้ที่สุดแทนการหาจากชื่อ เพราะพล็อตชื่อเป็นตัวเลข
 local function getMyPlot()
-    local plotsFolder = game:GetService("Workspace"):FindFirstChild("Plots")
-    if not plotsFolder then return nil end
-    return plotsFolder:FindFirstChild(lp.Name) or nil
+    local plots = workspace:FindFirstChild("Plots")
+    if not plots then return nil end
+
+    local closestPlot = nil
+    local shortestDist = math.huge
+
+    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+        local myPos = lp.Character.HumanoidRootPart.Position
+        
+        for _, plot in ipairs(plots:GetChildren()) do
+            local plotPos = nil
+            -- พยายามหาตำแหน่งของพล็อต ไม่ว่าจะพล็อตจะเป็น Model หรือ Part
+            if plot:IsA("Model") then
+                plotPos = plot:GetModelCFrame().Position
+            elseif plot:IsA("BasePart") then
+                plotPos = plot.Position
+            end
+
+            if plotPos then
+                local dist = (plotPos - myPos).Magnitude
+                -- ปกติพล็อตเราเองจะอยู่ห่างไม่เกิน 50-100 studs
+                if dist < shortestDist then
+                    shortestDist = dist
+                    closestPlot = plot
+                end
+            end
+        end
+    end
+    return closestPlot
 end
 
--- [[ GUI CREATION ]]
+-- [[ GUI ]]
 local ScreenGui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
-ScreenGui.Name = "SpinAnimeGuiV3_7"
+ScreenGui.Name = "SpinAnimeV3_9"
 
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
@@ -44,7 +64,7 @@ TitleBar.Size = UDim2.new(1, 0, 0, 32)
 TitleBar.BackgroundColor3 = Color3.fromRGB(140, 80, 255)
 local TitleLabel = Instance.new("TextLabel", TitleBar)
 TitleLabel.Size = UDim2.new(1, 0, 1, 0)
-TitleLabel.Text = "🌀  Spin a Anime v3.7"
+TitleLabel.Text = "🌀 Spin a Anime v3.9"
 TitleLabel.TextColor3 = Color3.new(1,1,1)
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.BackgroundTransparency = 1
@@ -63,62 +83,61 @@ local function createButton(name, text, yPos)
     return btn
 end
 
-local ToggleFarm = createButton("ToggleFarm", "⚡  AUTO FARM: OFF", 45)
-local TogglePotions = createButton("TogglePotions", "🧪  AUTO POTIONS: OFF", 98)
-local ToggleCrates = createButton("ToggleCrates", "🎁  AUTO CRATE: OFF", 151)
+local ToggleFarm = createButton("ToggleFarm", "⚡ FARM: OFF", 45)
+local TogglePotions = createButton("TogglePotions", "🧪 POTIONS: OFF", 98)
+local ToggleCrates = createButton("ToggleCrates", "🎁 CRATES: OFF", 151)
 
--- [[ LOGIC: AUTO BUY CRATES (5 Types) ]]
-task.spawn(function()
-    local crateRemote = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Crate"):WaitForChild("purchase")
-    while true do
-        if _G.AutoCrates then
-            for _, crateName in ipairs(cratesToBuy) do
-                if not _G.AutoCrates then break end
-                pcall(function()
-                    -- ซื้อทีละ 10 กล่องตามรายชื่อใน List
-                    crateRemote:FireServer(crateName, 10)
-                end)
-                task.wait(0.15) -- ปรับดีเลย์เล็กน้อยเพื่อให้เซิร์ฟเวอร์ประมวลผลทัน
-            end
-        end
-        task.wait(0.2)
-    end
-end)
-
--- [[ LOGIC: AUTO FARM ]]
+-- [[ LOGIC: AUTO FARM (BY DISTANCE) ]]
 task.spawn(function()
     while true do
         if _G.AutoFarm then
             local myPlot = getMyPlot()
-            if myPlot and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+            if myPlot then
                 local slots = myPlot:FindFirstChild("Slots")
                 if slots then
                     for _, num in ipairs(slotsToStep) do
                         if not _G.AutoFarm then break end
-                        local s = slots:FindFirstChild(tostring(num))
-                        if s and s:FindFirstChild("Button") then
+                        local slotFolder = slots:FindFirstChild(tostring(num))
+                        local button = slotFolder and slotFolder:FindFirstChild("Button")
+                        
+                        if button then
                             pcall(function()
-                                firetouchinterest(lp.Character.HumanoidRootPart, s.Button, 0)
-                                task.wait(0.02)
-                                firetouchinterest(lp.Character.HumanoidRootPart, s.Button, 1)
+                                -- แตะปุ่มในพล็อตที่อยู่ใกล้ที่สุด
+                                firetouchinterest(lp.Character.HumanoidRootPart, button, 0)
+                                firetouchinterest(lp.Character.HumanoidRootPart, button, 1)
                             end)
                         end
                     end
                 end
             end
         end
-        task.wait(0.1)
+        task.wait(0.05)
+    end
+end)
+
+-- [[ LOGIC: AUTO BUY CRATES ]]
+task.spawn(function()
+    local crateRemote = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Crate"):WaitForChild("purchase")
+    while true do
+        if _G.AutoCrates then
+            for _, crateName in ipairs(cratesToBuy) do
+                if not _G.AutoCrates then break end
+                pcall(function() crateRemote:FireServer(crateName, 10) end)
+                task.wait(0.15)
+            end
+        end
+        task.wait(0.2)
     end
 end)
 
 -- [[ LOGIC: AUTO POTIONS ]]
 task.spawn(function()
-    local potionRemote = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Potion"):WaitForChild("purchase")
+    local pr = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Potion"):WaitForChild("purchase")
     while true do
         if _G.AutoPotions then
-            for _, pName in ipairs(potionsToBuy) do
+            for _, p in ipairs(potionsToBuy) do
                 if not _G.AutoPotions then break end
-                pcall(function() potionRemote:FireServer(pName, 10) end)
+                pcall(function() pr:FireServer(p, 10) end)
                 task.wait(0.1)
             end
         end
@@ -126,22 +145,22 @@ task.spawn(function()
     end
 end)
 
--- [[ CONNECT BUTTONS ]]
+-- [[ BUTTON ACTIONS ]]
 ToggleFarm.MouseButton1Click:Connect(function()
     _G.AutoFarm = not _G.AutoFarm
-    ToggleFarm.Text = _G.AutoFarm and "⚡  AUTO FARM: ON" or "⚡  AUTO FARM: OFF"
+    ToggleFarm.Text = _G.AutoFarm and "⚡ FARM: ON" or "⚡ FARM: OFF"
     ToggleFarm.BackgroundColor3 = _G.AutoFarm and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
 end)
 
 TogglePotions.MouseButton1Click:Connect(function()
     _G.AutoPotions = not _G.AutoPotions
-    TogglePotions.Text = _G.AutoPotions and "🧪  AUTO POTIONS: ON" or "🧪  AUTO POTIONS: OFF"
+    TogglePotions.Text = _G.AutoPotions and "🧪 POTIONS: ON" or "🧪 POTIONS: OFF"
     TogglePotions.BackgroundColor3 = _G.AutoPotions and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
 end)
 
 ToggleCrates.MouseButton1Click:Connect(function()
     _G.AutoCrates = not _G.AutoCrates
-    ToggleCrates.Text = _G.AutoCrates and "🎁  AUTO CRATE: ON" or "🎁  AUTO CRATE: OFF"
+    ToggleCrates.Text = _G.AutoCrates and "🎁 CRATES: ON" or "🎁 CRATES: OFF"
     ToggleCrates.BackgroundColor3 = _G.AutoCrates and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
 end)
 
@@ -149,4 +168,4 @@ end)
 local vu = game:GetService("VirtualUser")
 lp.Idled:Connect(function() vu:CaptureController() vu:ClickButton2(Vector2.new()) end)
 
-print("🚀 v3.7 Loaded: 5 Crate Types Ready!")
+print("✅ v3.9 Hybrid (Plot Fix) Loaded!")
