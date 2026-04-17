@@ -5,7 +5,7 @@
 
 -- [[ CONFIGURATION ]]
 local lp = game.Players.LocalPlayer
-local slotsToStep = {1, 2, 3, 4, 5, 7, 8, 9}
+local slotsToStep = {1, 2, 3, 4, 5, 7, 8, 9, 10}
 local potionsToBuy = {
     "Greed", "Fairy", "Evil", "Bank", "Angelic",
     "Clover", "Super Lucky", "Super Yen", "Mutation", "Lucky", "Yen"
