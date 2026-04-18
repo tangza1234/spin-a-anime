@@ -130,20 +130,10 @@ task.spawn(function()
 end)
 
 -- [[ LOGIC: AUTO BUY CRATES ]]
-task.spawn(function()
-    local crateRemote = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Crate"):WaitForChild("purchase")
-    while true do
-        if _G.AutoCrates then
-            for _, crateName in ipairs(cratesToBuy) do
-                if not _G.AutoCrates then break end
-                pcall(function() crateRemote:FireServer(crateName, 10) end)
-                task.wait(0.15)
-            end
-        end
-        task.wait(0.2)
-    end
-end)
-
+for _, crateName in ipairs(cratesToBuy) do
+    crateRemote:FireServer(crateName, 10)
+end
+task.wait(600) -- 10 นาที
 -- [[ LOGIC: AUTO POTIONS ]]
 task.spawn(function()
     local pr = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Potion"):WaitForChild("purchase")
