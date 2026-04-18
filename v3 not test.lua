@@ -6,7 +6,18 @@
 
 local lp = game.Players.LocalPlayer
 local slotsToStep = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-local cratesToBuy = {"Royal", "Samurai", "Magma", "Manga", "Construction"} 
+local cratesToBuy = {
+    "Royal",
+    "Samurai",
+    "Magma",
+    "Manga",
+    "Construction",
+    "Red Moon",
+    "Celestial",
+    "Haunted",
+    "Abandoned",
+    "Ghost"
+}
 local potionsToBuy = {"Greed", "Fairy", "Evil", "Bank", "Angelic", "Clover", "Super Lucky", "Super Yen", "Mutation", "Lucky", "Yen"}
 
 _G.AutoFarm = false
