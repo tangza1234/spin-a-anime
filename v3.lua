@@ -140,7 +140,7 @@ task.spawn(function()
                 end
             end
 
-            task.wait(600) -- 10 นาที
+            task.wait(20) -- 10 นาที
         else
             task.wait(0.2)
         end
