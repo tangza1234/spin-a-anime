@@ -16,7 +16,8 @@ local cratesToBuy = {
     "Celestial",
     "Haunted",
     "Abandoned",
-    "Ghost"
+    "Ghost" ,
+    "Vortex"
 }
 local potionsToBuy = {"Greed", "Fairy", "Evil", "Bank", "Angelic", "Clover", "Super Lucky", "Super Yen", "Mutation", "Lucky", "Yen","Rich"}
 
