@@ -18,7 +18,8 @@ local cratesToBuy = {
     "Haunted",
     "Abandoned",
     "Ghost",
-    "Vortex"
+    "Vortex",
+    "Cursed"
 }
 
 local potionsToBuy = {
