@@ -113,7 +113,6 @@ task.spawn(function()
                         
                         if button then
                             pcall(function()
-                                -- แตะปุ่มในพล็อตที่อยู่ใกล้ที่สุด
                                 firetouchinterest(lp.Character.HumanoidRootPart, button, 0)
                                 firetouchinterest(lp.Character.HumanoidRootPart, button, 1)
                             end)
@@ -121,8 +120,11 @@ task.spawn(function()
                     end
                 end
             end
+
+            task.wait(600) -- ⏱️ 10 นาทีค่อยทำใหม่
+        else
+            task.wait(0.2)
         end
-        task.wait(0.05)
     end
 end)
 
