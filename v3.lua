@@ -1,26 +1,12 @@
--- ================================================
--- 🌀 Spin a Anime - [V3.9 PLOT NAME FIX]
--- ================================================
-
 local lp = game.Players.LocalPlayer
 
 -- SETTINGS
 local slotsToStep = {1,2,3,4,5,6,7,8,9,10,11,12}
 
 local cratesToBuy = {
-    "Royal",
-    "Samurai",
-    "Magma",
-    "Manga",
-    "Construction",
-    "Red Moon",
-    "Celestial",
-    "Haunted",
-    "Abandoned",
-    "Ghost",
-    "Vortex",
-    "Cursed",
-    "Devilous"
+    "Royal", "Samurai", "Magma", "Manga", "Construction",
+    "Red Moon", "Celestial", "Haunted", "Abandoned",
+    "Ghost", "Vortex", "Cursed", "Devilous"
 }
 
 local potionsToBuy = {
@@ -75,6 +61,7 @@ end
 
 local ScreenGui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
 ScreenGui.Name = "SpinAnimeV3_9"
+ScreenGui.ResetOnSpawn = false -- ✅ แก้: ไม่ให้ GUI หายตอน respawn
 
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25,25,35)
@@ -87,12 +74,22 @@ Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,10)
 local TitleBar = Instance.new("Frame", MainFrame)
 TitleBar.Size = UDim2.new(1,0,0,32)
 TitleBar.BackgroundColor3 = Color3.fromRGB(140,80,255)
+TitleBar.BorderSizePixel = 0
+Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0,10) -- ✅ แก้: เพิ่ม UICorner ให้ TitleBar
+
+-- ตัดมุมล่างของ TitleBar ให้ตรง
+local TitleFix = Instance.new("Frame", TitleBar)
+TitleFix.Size = UDim2.new(1,0,0.5,0)
+TitleFix.Position = UDim2.new(0,0,0.5,0)
+TitleFix.BackgroundColor3 = Color3.fromRGB(140,80,255)
+TitleFix.BorderSizePixel = 0
 
 local TitleLabel = Instance.new("TextLabel", TitleBar)
 TitleLabel.Size = UDim2.new(1,0,1,0)
 TitleLabel.Text = "🌀 Spin a Anime v3.9"
 TitleLabel.TextColor3 = Color3.new(1,1,1)
 TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 14
 TitleLabel.BackgroundTransparency = 1
 
 local function createButton(name, text, yPos)
@@ -105,13 +102,14 @@ local function createButton(name, text, yPos)
     btn.Text = text
     btn.TextColor3 = Color3.new(1,1,1)
     btn.TextSize = 13
+    btn.BorderSizePixel = 0
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
     return btn
 end
 
-local ToggleFarm     = createButton("ToggleFarm", "⚡ FARM: OFF", 45)
-local TogglePotions  = createButton("TogglePotions", "🧪 POTIONS: OFF", 98)
-local ToggleCrates   = createButton("ToggleCrates", "🎁 CRATES: OFF", 151)
+local ToggleFarm    = createButton("ToggleFarm",    "⚡ FARM: OFF",    45)
+local TogglePotions = createButton("TogglePotions", "🧪 POTIONS: OFF", 98)
+local ToggleCrates  = createButton("ToggleCrates",  "🎁 CRATES: OFF",  151)
 
 -- ================================================
 -- ⚡ AUTO FARM
@@ -132,7 +130,8 @@ task.spawn(function()
                         local slotFolder = slots:FindFirstChild(tostring(num))
                         local button = slotFolder and slotFolder:FindFirstChild("Button")
 
-                        if button then
+                        -- ✅ แก้: เช็ค Character และ HumanoidRootPart ก่อนทุกครั้ง
+                        if button and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
                             pcall(function()
                                 firetouchinterest(lp.Character.HumanoidRootPart, button, 0)
                                 firetouchinterest(lp.Character.HumanoidRootPart, button, 1)
@@ -142,7 +141,7 @@ task.spawn(function()
                 end
             end
 
-            task.wait(20) -- 10 นาที
+            task.wait(20) -- ✅ แก้: 20 วินาที (comment เดิมผิด ไม่ใช่ 10 นาที)
         else
             task.wait(0.2)
         end
@@ -154,13 +153,17 @@ end)
 -- ================================================
 
 task.spawn(function()
-    local crateRemote = game:GetService("ReplicatedStorage")
-        :WaitForChild("Events")
-        :WaitForChild("Crate")
-        :WaitForChild("purchase")
+    -- ✅ แก้: ครอบ pcall + ใส่ timeout ป้องกันค้างถ้า path ผิด
+    local crateRemote
+    pcall(function()
+        crateRemote = game:GetService("ReplicatedStorage")
+            :WaitForChild("Events", 10)
+            :WaitForChild("Crate", 10)
+            :WaitForChild("purchase", 10)
+    end)
 
     while true do
-        if _G.AutoCrates then
+        if _G.AutoCrates and crateRemote then
             for _, crateName in ipairs(cratesToBuy) do
                 if not _G.AutoCrates then break end
 
@@ -181,13 +184,17 @@ end)
 -- ================================================
 
 task.spawn(function()
-    local pr = game:GetService("ReplicatedStorage")
-        :WaitForChild("Events")
-        :WaitForChild("Potion")
-        :WaitForChild("purchase")
+    -- ✅ แก้: ครอบ pcall + ใส่ timeout ป้องกันค้างถ้า path ผิด
+    local pr
+    pcall(function()
+        pr = game:GetService("ReplicatedStorage")
+            :WaitForChild("Events", 10)
+            :WaitForChild("Potion", 10)
+            :WaitForChild("purchase", 10)
+    end)
 
     while true do
-        if _G.AutoPotions then
+        if _G.AutoPotions and pr then
             for _, p in ipairs(potionsToBuy) do
                 if not _G.AutoPotions then break end
 
@@ -235,4 +242,4 @@ lp.Idled:Connect(function()
     vu:ClickButton2(Vector2.new())
 end)
 
-print("✅ v3.9 Hybrid (Plot Fix) Loaded!")
+print("✅ Spin a Anime v3.9 (Fixed) โหลดสำเร็จ!")
