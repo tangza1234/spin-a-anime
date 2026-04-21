@@ -141,7 +141,7 @@ task.spawn(function()
                 end
             end
 
-            task.wait(20) -- ✅ แก้: 20 วินาที (comment เดิมผิด ไม่ใช่ 10 นาที)
+            task.wait(300) -- ✅ แก้: 20 วินาที (comment เดิมผิด ไม่ใช่ 10 นาที)
         else
             task.wait(0.2)
         end
