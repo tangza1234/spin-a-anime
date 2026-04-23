@@ -6,13 +6,13 @@ local slotsToStep = {1,2,3,4,5,6,7,8,9,10,11,12}
 local cratesToBuy = {
     "Royal", "Samurai", "Magma", "Manga", "Construction",
     "Red Moon", "Celestial", "Haunted", "Abandoned",
-    "Ghost", "Vortex", "Cursed", "Devilous"
+    "Ghost", "Vortex", "Cursed", "Devilous","Moss","Mirror","Infernus","Honey","Green Lantern","Gear Work","Foam","Enchanted Wood","DNA","Deep Sea","Coral","Clockwork","Caged Energy","Cage Bound"
 }
 
 local potionsToBuy = {
     "Greed","Fairy","Evil","Bank","Angelic",
     "Clover","Super Lucky","Super Yen",
-    "Mutation","Lucky","Yen","Rich"
+    "Mutation","Lucky","Yen","Rich","Pulse","Spark","Golden koi","Imperial","Morph"
 }
 
 _G.AutoFarm = false
@@ -188,9 +188,9 @@ task.spawn(function()
     local pr
     pcall(function()
         pr = game:GetService("ReplicatedStorage")
-            :WaitForChild("Events", 10)
-            :WaitForChild("Potion", 10)
-            :WaitForChild("purchase", 10)
+            :WaitForChild("Events", 15)
+            :WaitForChild("Potion", 15)
+            :WaitForChild("purchase", 15)
     end)
 
     while true do
