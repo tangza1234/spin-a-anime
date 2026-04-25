@@ -13,7 +13,7 @@ local cratesToBuy = {
 local potionsToBuy = {
     "Greed","Fairy","Evil","Bank","Angelic",
     "Clover","Super Lucky","Super Yen",
-    "Mutation","Lucky","Yen","Rich","Pulse","Spark","Golden koi","Imperial","Morph"
+    "Mutation","Lucky","Yen","Rich","Pulse","Spark","Golden Koi","Imperial","Morph"
 }
 
 _G.AutoFarm = false
