@@ -7,7 +7,7 @@ local cratesToBuy = {
     "Royal", "Samurai", "Magma", "Manga", "Construction",
     "Red Moon", "Celestial", "Haunted", "Abandoned",
     "Ghost", "Vortex", "Cursed", "Devilous","Moss","Mirror","Infernus","Honey","Green Lantern","Gear Work","Foam","Enchanted Wood","DNA","Deep Sea","Coral","Clockwork","Caged Energy","Cage Bound"
-    ,"Purple Curse"
+    ,"Purple Curse","Iron Bound"
 }
 
 local potionsToBuy = {
